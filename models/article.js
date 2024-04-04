@@ -31,18 +31,19 @@ const articleSchema = new mongoose.Schema({
     }
 })
 
-articleSchema.pre('validate', function(next){
-    if(this.title){
-        this.slug = slugify(this.title,{lower:true, strict: true})
+articleSchema.pre('validate', function(next) {
+    if (this.markdown) {
+        // Convert markdown to HTML first
+        const html = marked(this.markdown);
+        // Then sanitize HTML
+        this.sanitizedHTML = dompurify.sanitize(html);
     }
-    if(this.markdown){
-        this.sanitizedHTML= dompurify.sanitize(marked(this.markdown))
+    if (this.title) {
+        this.slug = slugify(this.title, { lower: true, strict: true });
     }
+    next();
+});
 
-    next()
-
- 
-})
 
 
 module.exports = mongoose.model('Article',articleSchema)
